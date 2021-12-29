@@ -15,11 +15,11 @@ import us.codecraft.webmagic.processor.PageProcessor;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import cn.edu.bistu.cs.bigdata.crawlerpart.baicdata.BasicInformation;
 
-public class ArticleInformation implements PageProcessor{
+
+public class ArticleInformationApproach implements PageProcessor{
     private static Logger logger = Logger.getLogger(ArticleInformation.class);
     private final Site site = Site.me().setRetrySleepTime(3).setRetrySleepTime(3000).setSleepTime(5000);
 
@@ -27,11 +27,11 @@ public class ArticleInformation implements PageProcessor{
     public void process(Page page) {
         String BasicAddress = page.getRequest().getUrl();
         Document document = Jsoup.parse(BasicAddress);
-        BasicInformation basicInformation = new BasicInformation();
 
         //文献名称
         page.putField("title", page.getHtml().xpath("/html/body/div[1]/div[1]/div[2]/div[2]/div[1]/div[2]/div[1]/div[1]/text()").toString());
-        basicInformation.setArticleName(page.getHtml().xpath("/html/body/div[1]/div[1]/div[2]/div[2]/div[1]/div[2]/div[1]/div[1]/text()").toString());
+
+
         //文献作者
         //page.putField("name", page.getHtml().xpath("//*[@id=\"CnAuthorList\"]/li[2]/a/text()").toString());
         /*
@@ -44,14 +44,16 @@ public class ArticleInformation implements PageProcessor{
                 author.add(aut.attr("content"));
             }
         }
-        basicInformation.setAuthorName(author);
+        autElement.attr("content");
 
         //论文摘要
         page.putField("abstract", page.getHtml().xpath("//*[@id=\"CnAbstractValue\"]/text()").toString());
-        basicInformation.setAbstract(page.getHtml().xpath("//*[@id=\"CnAbstractValue\"]/text()").toString());
         //论文关键词
+
         /*
         //使用jsoup抽取JavaScript
+
+
         Elements element = document.getElementsByAttributeValue("language", "javascript").eq(6);
         //eq()方法的含义
         for(Element e:element){
@@ -71,11 +73,6 @@ public class ArticleInformation implements PageProcessor{
         因为网页的特殊原因，关键词隐藏在meta中，所以只需要提取meta中content的内容即可。
          */
         page.putField("keyword", page.getHtml().xpath("/html/head/meta[5]/@content").toString());
-        String[] keyword = page.getHtml().xpath("/html/head/meta[5]/@content").toString().split(";");
-        ArrayList<String> abs = new ArrayList<>(Arrays.asList(keyword));
-        basicInformation.setKeyWord(abs);
-
-
         //后续再连接数据类型时，只需要将相应的字符串split()即可
         //*[@id="CnKeyWord"]/a[2]
 
@@ -98,7 +95,7 @@ public class ArticleInformation implements PageProcessor{
 
     public static void main(String[] args){
         logger.info("This is info message!");
-        Spider.create(new ArticleInformation())
+        Spider.create(new ArticleInformationApproach())
                 .addUrl("http://www.jos.org.cn/jos/article/abstract/5012")
                 //.addPipeline(new JsonFilePipeline("F:\\Project\\CrawlerInformation\\src"))
                 //.addPipeline(new JsonFilePipeline("/home/carlsmith-wuzhuo/Desktop/CrawlerInformation"))
