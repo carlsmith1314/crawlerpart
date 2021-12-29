@@ -13,25 +13,44 @@ import us.codecraft.webmagic.pipeline.ConsolePipeline;
 import us.codecraft.webmagic.pipeline.JsonFilePipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import cn.edu.bistu.cs.bigdata.crawlerpart.baicdata.BasicInformation;
 
 public class ArticleInformation implements PageProcessor{
     private static Logger logger = Logger.getLogger(ArticleInformation.class);
-    private final Site site = Site.me().setRetrySleepTime(3).setRetrySleepTime(3000).setSleepTime(5000);
+    private final Site site = Site.me()
+            .setRetrySleepTime(3)
+            .setRetrySleepTime(3000)
+            .setSleepTime(5000)
+            .setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36");
 
     @Override
     public void process(Page page) {
         String BasicAddress = page.getRequest().getUrl();
-        Document document = Jsoup.parse(BasicAddress);
+        Document document = null;
+        try {
+            document = Jsoup.connect(BasicAddress).get();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         BasicInformation basicInformation = new BasicInformation();
 
         //文献名称
-        page.putField("title", page.getHtml().xpath("/html/body/div[1]/div[1]/div[2]/div[2]/div[1]/div[2]/div[1]/div[1]/text()").toString());
-        basicInformation.setArticleName(page.getHtml().xpath("/html/body/div[1]/div[1]/div[2]/div[2]/div[1]/div[2]/div[1]/div[1]/text()").toString());
+        //page.putField("title", page.getHtml().xpath("//[@class=\"title\"]/text()").toString());
+        //basicInformation.setArticleName(page.getHtml().xpath("/html/body/div[1]/div[1]/div[2]/div[2]/div[1]/div[2]/div[1]/div[1]/text()").toString());
+        //String title = page.getHtml().xpath("//[@class=\"title\"]").toString();
+
+        Elements t = document.getElementsByAttributeValue("class", "title");
+        String te = String.valueOf(t.get(0).html()
+                .replace("\n","")
+                .replace("<i>", "")
+                .replace("</i>", ""));
+        page.putField("title", te);
         //文献作者
         //page.putField("name", page.getHtml().xpath("//*[@id=\"CnAuthorList\"]/li[2]/a/text()").toString());
         /*
@@ -40,10 +59,13 @@ public class ArticleInformation implements PageProcessor{
         ArrayList<String> author = new ArrayList<>();
         Elements autElement = document.getElementsByAttributeValue("name", "citation_author");
         for(Element aut: autElement){
-            if(aut.attr("content").matches("\u4e00-\u9fa5")){
+            String a = aut.attr("content");
+            if(aut.attr("content").matches("[\\u4E00-\\u9FFF]+")){
                 author.add(aut.attr("content"));
+                //logger.info(aut.attr("content"));
             }
         }
+        page.putField("name", author);
         basicInformation.setAuthorName(author);
 
         //论文摘要
@@ -72,7 +94,8 @@ public class ArticleInformation implements PageProcessor{
          */
         page.putField("keyword", page.getHtml().xpath("/html/head/meta[5]/@content").toString());
         String[] keyword = page.getHtml().xpath("/html/head/meta[5]/@content").toString().split(";");
-        ArrayList<String> abs = new ArrayList<>(Arrays.asList(keyword));
+        ArrayList<String> abs = new ArrayList<>(Arrays.asList(keyword).subList(0, keyword.length / 2));
+        page.putField("keyword", abs);
         basicInformation.setKeyWord(abs);
 
 
@@ -80,13 +103,11 @@ public class ArticleInformation implements PageProcessor{
         //*[@id="CnKeyWord"]/a[2]
 
         //将下一篇文献加入爬取队列
-        /*
-        for(int i = 12; i <= 62; i++){
+        for(int i = 13; i <= 62; i++){
             String temp = "http://www.jos.org.cn/jos/article/abstract/50" + i;
             //Request有自动去重的机制
-            page.addTargetRequests((Request) page.getHtml().links().regex(temp).all());
+            page.addTargetRequests(Collections.singletonList(temp));
         }
-         */
 
         //page.addTargetRequests(page.getHtml().links().regex("http://www.jos.org.cn/jos/article/abstract/5012").all());
     }
@@ -97,13 +118,14 @@ public class ArticleInformation implements PageProcessor{
     }
 
     public static void main(String[] args){
-        logger.info("This is info message!");
+        //logger.info("This is info message!");
         Spider.create(new ArticleInformation())
                 .addUrl("http://www.jos.org.cn/jos/article/abstract/5012")
                 //.addPipeline(new JsonFilePipeline("F:\\Project\\CrawlerInformation\\src"))
                 //.addPipeline(new JsonFilePipeline("/home/carlsmith-wuzhuo/Desktop/CrawlerInformation"))
                 //webmagic本身就包含有输出到控制台的效果
                 //.addPipeline(new ConsolePipeline())
+                .addPipeline(new JsonFilePipeline("/home/carlsmith-wuzhuo/Desktop/crawlerpart"))
                 .run();
     }
 }
