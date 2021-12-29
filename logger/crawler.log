@@ -1,0 +1,2 @@
+[main] INFO cn.edu.bistu.cs.bigdata.crawlerpart.ArticleInformation - This is info message!
+12-29 11:14:55 INFO [cn.edu.bistu.cs.bigdata.crawlerpart.ArticleInformation] cn.edu.bistu.cs.bigdata.crawlerpart.ArticleInformation.main(ArticleInformation.java:93) - This is info message!
