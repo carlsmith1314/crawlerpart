@@ -1,27 +1,24 @@
-package cn.edu.bistu.cs.bigdata.crawlerpart;
+package cn.edu.bistu.cs.bigdata.crawlerpart.JOC;
+import cn.edu.bistu.cs.bigdata.crawlerpart.ArticlePipeline;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 import us.codecraft.webmagic.Page;
-import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
-import us.codecraft.webmagic.pipeline.ConsolePipeline;
 import us.codecraft.webmagic.pipeline.JsonFilePipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
 import cn.edu.bistu.cs.bigdata.crawlerpart.baicdata.BasicInformation;
 
-public class ArticleInformation2 implements PageProcessor{
+public class ArticleInformation implements PageProcessor{
     private static Logger logger = Logger.getLogger(ArticleInformation.class);
     private final Site site = Site.me()
             .setRetrySleepTime(3)
@@ -125,7 +122,8 @@ public class ArticleInformation2 implements PageProcessor{
                 //.addPipeline(new JsonFilePipeline("/home/carlsmith-wuzhuo/Desktop/CrawlerInformation"))
                 //webmagic本身就包含有输出到控制台的效果
                 //.addPipeline(new ConsolePipeline())
-                .addPipeline(new JsonFilePipeline("/home/carlsmith-wuzhuo/Desktop/crawlerpart"))
+                .addPipeline(new ArticlePipeline())
+                //.addPipeline(new JsonFilePipeline("/home/carlsmith-wuzhuo/Desktop/crawlerpart"))
                 .run();
     }
 }
