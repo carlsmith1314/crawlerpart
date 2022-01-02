@@ -64,6 +64,15 @@ public class ArticleInformation implements PageProcessor {
         String[] keyword = page.getHtml().xpath("/html/head/meta[2]/@content").toString().split(",");
         ArrayList<String> keyValue = new ArrayList<>(Arrays.asList(keyword).subList(0, keyword.length - 1));
         page.putField("keyword", keyValue);
+
+        //文献数据源唯一标识
+        StringBuffer JOCIP_ID = new StringBuffer();
+        for(int i = basicAdd.length() - 10; i < basicAdd.length() - 6; i++){
+            JOCIP_ID.append(JOCIP_ID.charAt(i));
+        }
+        page.putField("JOPIC_ID", JOCIP_ID);
+
+
         //换页爬取
         for(int i = 3001; i <= 3099; i++){
             String temp = "http://jcip.cipsc.org.cn/CN/abstract/abstract" + i + ".shtml";

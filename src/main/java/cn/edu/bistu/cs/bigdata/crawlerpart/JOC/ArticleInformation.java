@@ -27,6 +27,7 @@ public class ArticleInformation implements PageProcessor{
             .setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36");
 
     @Override
+    @lombok.SneakyThrows
     public void process(Page page) {
         String BasicAddress = page.getRequest().getUrl();
         Document document = null;
@@ -42,6 +43,7 @@ public class ArticleInformation implements PageProcessor{
         //basicInformation.setArticleName(page.getHtml().xpath("/html/body/div[1]/div[1]/div[2]/div[2]/div[1]/div[2]/div[1]/div[1]/text()").toString());
         //String title = page.getHtml().xpath("//[@class=\"title\"]").toString();
 
+        assert document != null;
         Elements t = document.getElementsByAttributeValue("class", "title");
         String te = String.valueOf(t.get(0).html()
                 .replace("\n","")
@@ -95,6 +97,24 @@ public class ArticleInformation implements PageProcessor{
         page.putField("keyword", abs);
         basicInformation.setKeyWord(abs);
 
+        //文献DOI（文献的唯一标识，相当于文献的身份证）
+        String DOI = page.getHtml().xpath("//*[@id=\"DOIValue\"]/text()").toString();
+        page.putField("DOI", DOI);
+
+        //期刊名称
+        String add_of_introduce = page.getHtml().xpath("/html/body/div[1]/div[1]/div[1]/div[2]/ul/li[2]/a/@href").toString();
+        //Request temporary = page.getRequest().setUrl(add_of_introduce);
+        Document joc_document = Jsoup.connect("http://www.jos.org.cn/" + add_of_introduce).get();
+        Elements joc_name = joc_document.getElementsByAttributeValue("name", "KeyWords");
+        String joc = joc_name.get(0).attr("content");
+        page.putField("kan_name", joc);
+
+        //数据源内唯一标识
+        StringBuffer joc_id = new StringBuffer();
+        for(int i = BasicAddress.length()-5; i < BasicAddress.length(); i++){
+            joc_id.append(joc_id.charAt(i));
+        }
+        page.putField("joc_id", joc_id);
 
         //后续再连接数据类型时，只需要将相应的字符串split()即可
         //*[@id="CnKeyWord"]/a[2]
@@ -122,7 +142,7 @@ public class ArticleInformation implements PageProcessor{
                 //.addPipeline(new JsonFilePipeline("/home/carlsmith-wuzhuo/Desktop/CrawlerInformation"))
                 //webmagic本身就包含有输出到控制台的效果
                 //.addPipeline(new ConsolePipeline())
-                .addPipeline(new ArticlePipeline())
+                .addPipeline(new JOCPipeline())
                 //.addPipeline(new JsonFilePipeline("/home/carlsmith-wuzhuo/Desktop/crawlerpart"))
                 .run();
     }

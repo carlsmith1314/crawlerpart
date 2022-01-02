@@ -7,7 +7,7 @@ import java.sql.Statement;
 
 public class JDBC {
 
-    private final String url = "jdbc:mysql://localhost:3306/kw?useUnicode=true&characterEncoding=utf8";
+    private final String url = "jdbc:mysql://localhost:3306/Information_Kw?useUnicode=true&characterEncoding=utf8";
     private final String user = "root";
     private final String password = "123456";
     private static Connection conn;
